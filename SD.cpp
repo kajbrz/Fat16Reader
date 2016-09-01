@@ -54,6 +54,7 @@ SDreader::initialize()
   if (!file)
     return false;
   
+  file.seekg(0x1be, )
   
   
   return false;
