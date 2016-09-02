@@ -52,7 +52,20 @@ class SDreader
       int8_t bootCode[448];           //0x03e
       uint16_t bootSectorSignature;   //0x1fe
     } __attribute__((packed)) BootSector; //FAT16
+    
+    typedef struct 
+    {
+      uint8_t filename[8];
+      uint8_t ext[3];
+      uint8_t attributes;
+      uint8_t reserved[10];
+      uint16_t modifyTime;
+      uint16_t modifyDate;
+      uint16_t startingCluster;
+      uint32_t fileSize;
+    } __attribute((packed)) Fat16Entry;   
        
+    
   public:
     SDreader(const SDreader&);
     SDreader();    
@@ -64,18 +77,18 @@ class SDreader
   private:
     bool active = false;
     std::fstream file;
-    std::string filename;       
+    std::string filename;  
+    
     
     std::vector <PartitionTable> partitionTables;
     std::vector <BootSector> bootSectors;
+    std::vector <Fat16Entry> fat16Entries;
     
     bool readPartition();    
     bool readBootSectors();
     bool readRootSector();
     
     void showPartion();
-    void showBootSectors();
-    
-    
+    void showBootSectors();  
 };
 #endif // CLASS_SD_H
