@@ -63,22 +63,23 @@ class SDreader
       uint16_t modifyDate;
       uint16_t startingCluster;
       uint32_t fileSize;
-    } __attribute((packed)) Fat16Entry;   
-       
-    
+    } __attribute((packed)) Fat16Entry;  
+        
   public:
     SDreader(const SDreader&);
     SDreader();    
     SDreader operator=(const SDreader&);
 
     bool insertDisk(std::string);
-    bool showFilesConsole();
     bool initialize();
+    bool showFilesConsole();
+    bool showFile(size_t which);
+    bool copyFileToDirectory(size_t wich, std::string path);
+    
   private:
     bool active = false;
-    std::fstream file;
+    std::fstream file; 
     std::string filename;  
-    
     
     std::vector <PartitionTable> partitionTables;
     std::vector <BootSector> bootSectors;

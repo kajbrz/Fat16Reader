@@ -125,7 +125,7 @@ SDreader::readBootSectors()
       case 14:
         break;
       default:
-        std::cerr << "Not supported file system" << std::endl;
+        std::cerr << "ERROR: Not supported file system" << std::endl;
         err = true;
     }
     
@@ -149,15 +149,25 @@ SDreader::showBootSectors()
 {
   for (size_t i = 0; i < bootSectors.size(); i++)
   {
-    printf("Partition : %d\n", i);
+    printf("\nPartition : %d\n", i);
     printf("jump : %X:%X:%X\n", 
       bootSectors[i].jump[0], 
       bootSectors[i].jump[1],
       bootSectors[i].jump[2]);
-    
+      
+    printf("numberOfFats : %hhd\n", bootSectors[i].numberOfFats);
+    printf("rootDirEntries : %hd\n", bootSectors[i].rootDirEntries);
+    printf("totalSectorsShort : %hd\n", bootSectors[i].totalSectorsShort);
+    printf("mediaDescriptor : %hd\n", bootSectors[i].mediaDescriptor);
+    printf("fatSizeSectors : %hhd\n", bootSectors[i].fatSizeSectors);
+    printf("sectorsPerTrack : %hd\n", bootSectors[i].sectorsPerTrack);
+    printf("numberOfHeads : %hd\n", bootSectors[i].numberOfHeads);
+    printf("hiddenSectors : %d\n", bootSectors[i].hiddenSectors);
+    printf("totalSectorsLong : %d\n", bootSectors[i].totalSectorsLong);
+      
     printf("Partition : %8s\n", bootSectors[i].oem);    
     printf("Volumne label: [%.11s]\n", bootSectors[i].volumeLabel);
-    printf("File system label: [%.8s]\n", bootSectors[i].fsType);
+    printf("File system label: [%.8s]\n\n", bootSectors[i].fsType);
   }
 }
 
@@ -191,5 +201,34 @@ SDreader::readRootSector()
       fat16Entries[i].filename, fat16Entries[i].ext); 
   }
   
+  return false;
+}
+
+bool 
+SDreader::showFile(size_t which) //from root
+{
+  if (!active)
+    return false;
+  
+  if (which >= fat16Entries.size())
+    return false;
+    
+  printf("[%.8s.%.3s]\n", 
+    fat16Entries[which].filename, fat16Entries[which].ext);  
+  
+  std::cout << "Attributes: " << std::hex << fat16Entries[which].attributes << std::endl
+    << "Modify Time: " << std::hex << fat16Entries[which].modifyTime << std::endl
+    << "Modify Date: " << std::hex << fat16Entries[which].modifyDate << std::endl
+    << "Starting Cluster: " << std::hex << fat16Entries[which].startingCluster << std::endl
+    << "File Size: " << std::hex << fat16Entries[which].fileSize << std::endl;
+  
+  return true;
+}
+
+bool 
+SDreader::copyFileToDirectory(size_t wich, std::string path)
+{
+  
+
   return false;
 }
