@@ -6,7 +6,7 @@
 #include <string>
 #include <cstdint>
 
-#define 
+#define PARTITION_TABLE_START 0x1BE
 
 class SDreader 
 {
@@ -32,7 +32,8 @@ class SDreader
   private:
     bool active = false;
     std::fstream file;
-    std::string filename;
+    std::string filename;       
+    
     PartitionTable partitionTable[4];
     
     bool readBasicInformation();

@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <string>
+#include <cstdio>
 
 SDreader::SDreader(const SDreader &sdreader)
 {
@@ -35,9 +36,10 @@ SDreader::insertDisk(std::string image)
   else
   {    
     std::cerr << "ERROR: File " << image << " not found" << "\n";
+    return false;
   }  
       
-  return false;
+  return true;
 }
 
 bool 
@@ -54,10 +56,17 @@ SDreader::initialize()
   if (!file)
     return false;
   
-  file.seekg(0x1be, )
+  file.seekg(PARTITION_TABLE_START, std::ios_base::beg);
+  file.read(reinterpret_cast<char*>(partitionTable), sizeof(PartitionTable) * 4); 
   
-  
-  return false;
+  for (size_t i = 0; i < 4; i++)
+  {
+    printf("Partition %d, type 0x%x\n", i, partitionTable[i].partitionType);
+    printf("\tStart sector 0x%x, %d sectors long\n", 
+      partitionTable[i].startSector, partitionTable[i].lengthSector);  
+  }
+    
+  return true;
 }
 
 
