@@ -81,7 +81,7 @@ SDreader::showPartion()
 {
   for (size_t i = 0; i < partitionTables.size(); i++)
   {
-    printf("Partition %d, type 0x%x\n", i, partitionTables[i].partitionType);
+    printf("Partition %lu, type 0x%x\n", i, partitionTables[i].partitionType);
     printf("\tStart sector 0x%x, %d sectors long\n", 
       partitionTables[i].startSector, partitionTables[i].lengthSector);  
   }     
@@ -149,23 +149,23 @@ SDreader::showBootSectors()
 {
   for (size_t i = 0; i < bootSectors.size(); i++)
   {
-    printf("\nPartition : %d\n", i);
+    printf("\nPartition : %lu\n", i);
     printf("jump : %X:%X:%X\n", 
       bootSectors[i].jump[0], 
       bootSectors[i].jump[1],
       bootSectors[i].jump[2]);
       
-    printf("numberOfFats : %hhd\n", bootSectors[i].numberOfFats);
-    printf("rootDirEntries : %hd\n", bootSectors[i].rootDirEntries);
-    printf("totalSectorsShort : %hd\n", bootSectors[i].totalSectorsShort);
+    printf("numberOfFats : %hhu\n", bootSectors[i].numberOfFats);
+    printf("rootDirEntries : %hu\n", bootSectors[i].rootDirEntries);
+    printf("totalSectorsShort : %hu\n", bootSectors[i].totalSectorsShort);
     printf("mediaDescriptor : %hd\n", bootSectors[i].mediaDescriptor);
-    printf("fatSizeSectors : %hhd\n", bootSectors[i].fatSizeSectors);
-    printf("sectorsPerTrack : %hd\n", bootSectors[i].sectorsPerTrack);
-    printf("numberOfHeads : %hd\n", bootSectors[i].numberOfHeads);
-    printf("hiddenSectors : %d\n", bootSectors[i].hiddenSectors);
-    printf("totalSectorsLong : %d\n", bootSectors[i].totalSectorsLong);
+    printf("fatSizeSectors : %hhu\n", bootSectors[i].fatSizeSectors);
+    printf("sectorsPerTrack : %hu\n", bootSectors[i].sectorsPerTrack);
+    printf("numberOfHeads : %hu\n", bootSectors[i].numberOfHeads);
+    printf("hiddenSectors : %u\n", bootSectors[i].hiddenSectors);
+    printf("totalSectorsLong : %u\n", bootSectors[i].totalSectorsLong);
       
-    printf("Partition : %8s\n", bootSectors[i].oem);    
+    printf("Partition : %.8s\n", bootSectors[i].oem);    
     printf("Volumne label: [%.11s]\n", bootSectors[i].volumeLabel);
     printf("File system label: [%.8s]\n\n", bootSectors[i].fsType);
   }
@@ -197,7 +197,7 @@ SDreader::readRootSector()
       
     fat16Entries.push_back(temporary16Entry);
     
-    printf("File %d: [%.8s.%.3s]\n", i,
+    printf("File %lu: [%.8s.%.3s]\n", i,
       fat16Entries[i].filename, fat16Entries[i].ext); 
   }
   
@@ -213,11 +213,19 @@ SDreader::showFile(size_t which) //from root
   if (which >= fat16Entries.size())
     return false;
     
+  uint8_t hour    = (fat16Entries[which].modifyTime & 0xf800) >> (5+6);  
+  uint8_t minutes = (fat16Entries[which].modifyTime & 0x07e0) >> (5);  
+  uint8_t seconds = (fat16Entries[which].modifyTime & 0x001f) << 1;
+  
+  
   printf("[%.8s.%.3s]\n", 
     fat16Entries[which].filename, fat16Entries[which].ext);  
   
   std::cout << "Attributes: " << std::hex << fat16Entries[which].attributes << std::endl
-    << "Modify Time: " << std::hex << fat16Entries[which].modifyTime << std::endl
+    << "Modify Time: " << std::dec
+      << static_cast<unsigned int>(hour)    << ":" 
+      << static_cast<unsigned int>(minutes) << ":" 
+      << static_cast<unsigned int>(seconds) << std::endl   
     << "Modify Date: " << std::hex << fat16Entries[which].modifyDate << std::endl
     << "Starting Cluster: " << std::hex << fat16Entries[which].startingCluster << std::endl
     << "File Size: " << std::hex << fat16Entries[which].fileSize << std::endl;

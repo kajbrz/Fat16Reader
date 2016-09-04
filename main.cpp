@@ -27,7 +27,7 @@ main(int argv, char *arg[])
     return 3;
   }
   
-  if (!sdreader.showFile(0))
+  if (!sdreader.showFile(1))
   {
     std::cerr << "Error: Cannot find file\n" << std::endl;  
     return 4;
