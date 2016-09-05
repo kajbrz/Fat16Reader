@@ -135,6 +135,7 @@ SDreader::readBootSectors()
       continue;
     }
     
+    std::cout << "\t\t: Now we are in byte: " << std::hex << SECTOR_SIZE * partitionTables[i].startSector;
     file.seekg(SECTOR_SIZE * partitionTables[i].startSector, std::ios_base::beg);
     file.read(reinterpret_cast<char *>(&temporaryBootSector), sizeof(BootSector));
     
@@ -155,15 +156,18 @@ SDreader::showBootSectors()
       bootSectors[i].jump[1],
       bootSectors[i].jump[2]);
       
-    printf("numberOfFats : %hhu\n", bootSectors[i].numberOfFats);
     printf("rootDirEntries : %hu\n", bootSectors[i].rootDirEntries);
     printf("totalSectorsShort : %hu\n", bootSectors[i].totalSectorsShort);
     printf("mediaDescriptor : %hd\n", bootSectors[i].mediaDescriptor);
-    printf("fatSizeSectors : %hhu\n", bootSectors[i].fatSizeSectors);
-    printf("sectorsPerTrack : %hu\n", bootSectors[i].sectorsPerTrack);
+    printf("sectorsPerTrack : %hu\n", bootSectors[i].sectorsPerTrack);    
     printf("numberOfHeads : %hu\n", bootSectors[i].numberOfHeads);
     printf("hiddenSectors : %u\n", bootSectors[i].hiddenSectors);
     printf("totalSectorsLong : %u\n", bootSectors[i].totalSectorsLong);
+    
+    printf("  reservedSectors : %u\n", bootSectors[i].reservedSectors);
+    printf("  fatSizeSectors : %hhu\n", bootSectors[i].fatSizeSectors);
+    printf("  numberOfFats : %hhu\n", bootSectors[i].numberOfFats);
+    printf("  sectorSize : %u\n", bootSectors[i].sectorSize);
       
     printf("Partition : %.8s\n", bootSectors[i].oem);    
     printf("Volumne label: [%.11s]\n", bootSectors[i].volumeLabel);
@@ -182,6 +186,12 @@ SDreader::readRootSector()
   
   Fat16Entry temporary16Entry;
   
+  std::cout << "\t\t: Now we are in byte: " 
+    << std::hex << 
+      (SECTOR_SIZE * partitionTables[0].startSector + 
+      (bootSectors[0].reservedSectors - 1 +
+      bootSectors[0].fatSizeSectors * 
+      bootSectors[0].numberOfFats) * bootSectors[0].sectorSize) << std::endl;
   file.seekg(
     (bootSectors[0].reservedSectors - 1 +
     bootSectors[0].fatSizeSectors * 
@@ -215,10 +225,9 @@ SDreader::showFile(size_t which) //from root
     
   uint8_t hour    = (fat16Entries[which].modifyTime & 0xf800) >> (5+6);  
   uint8_t minutes = (fat16Entries[which].modifyTime & 0x07e0) >> (5);  
-  uint8_t seconds = (fat16Entries[which].modifyTime & 0x001f) << 1;
+  uint8_t seconds = (fat16Entries[which].modifyTime & 0x001f) << 1;  
   
-  
-  printf("[%.8s.%.3s]\n", 
+  printf("\n[%.8s.%.3s]\n", 
     fat16Entries[which].filename, fat16Entries[which].ext);  
   
   std::cout << "Attributes: " << std::hex << fat16Entries[which].attributes << std::endl
@@ -233,10 +242,22 @@ SDreader::showFile(size_t which) //from root
   return true;
 }
 
-bool 
-SDreader::copyFileToDirectory(size_t wich, std::string path)
+uint32_t 
+SDreader::clusterToSector(uint32_t cluster)
 {
+  unsigned il; 
+  il= cluster-2; 
+  //il= il * sectorsPerCluster; 
+  //il= il + dataStart; 
   
+  return(il);      
+}
+
+bool 
+SDreader::copyFileToDirectory(size_t which, std::string path)
+{
+  uint32_t sector = clusterToSector(fat16Entries[which].startingCluster);
 
   return false;
 }
+

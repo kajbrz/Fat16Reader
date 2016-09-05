@@ -91,5 +91,7 @@ class SDreader
     
     void showPartion();
     void showBootSectors();  
+    
+    uint32_t clusterToSector(uint32_t);
 };
 #endif // CLASS_SD_H
