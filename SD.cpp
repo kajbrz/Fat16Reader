@@ -167,8 +167,9 @@ SDreader::showBootSectors()
     printf("  reservedSectors : %u\n", bootSectors[i].reservedSectors);
     printf("  fatSizeSectors : %hhu\n", bootSectors[i].fatSizeSectors);
     printf("  numberOfFats : %hhu\n", bootSectors[i].numberOfFats);
-    printf("  sectorSize : %u\n", bootSectors[i].sectorSize);
-      
+    printf("  sectorSize : %u\n", bootSectors[i].sectorSize);      
+    printf("  sectersPerCluster : %u\n", bootSectors[i].sectersPerCluster);
+    
     printf("Partition : %.8s\n", bootSectors[i].oem);    
     printf("Volumne label: [%.11s]\n", bootSectors[i].volumeLabel);
     printf("File system label: [%.8s]\n\n", bootSectors[i].fsType);
@@ -205,6 +206,7 @@ SDreader::readRootSector()
     if (temporary16Entry.filename[0] == '\0')
       continue;
       
+    std::cerr << "TRY ENTRY: " << i;
     fat16Entries.push_back(temporary16Entry);
     
     printf("File %lu: [%.8s.%.3s]\n", i,
