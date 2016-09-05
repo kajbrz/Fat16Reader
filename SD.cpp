@@ -220,11 +220,15 @@ bool
 SDreader::showFile(size_t which) //from root
 {
   if (!active)
+  {
+    std::cerr << "ERROR: Not Active" << std::endl;
     return false;
-  
+  }
   if (which >= fat16Entries.size())
+  {  
+    std::cerr << "ERROR: fat16Entries Wrong" << std::endl;
     return false;
-    
+  }
   uint8_t hour    = (fat16Entries[which].modifyTime & 0xf800) >> (5+6);  
   uint8_t minutes = (fat16Entries[which].modifyTime & 0x07e0) >> (5);  
   uint8_t seconds = (fat16Entries[which].modifyTime & 0x001f) << 1;  
@@ -258,8 +262,24 @@ SDreader::clusterToSector(uint32_t cluster)
 bool 
 SDreader::copyFileToDirectory(size_t which, std::string path)
 {
-  uint32_t sector = clusterToSector(fat16Entries[which].startingCluster);
-
-  return false;
+  //uint32_t sector = clusterToSector(fat16Entries[which].startingCluster);
+  uint32_t dataStartBlock = 
+      (SECTOR_SIZE * partitionTables[which].startSector + 
+      (bootSectors[which].reservedSectors - 1 +
+      bootSectors[which].fatSizeSectors * 
+      bootSectors[which].numberOfFats) * bootSectors[which].sectorSize)
+      + (bootSectors[which].sectersPerCluster * bootSectors[which].rootDirEntries) + ((fat16Entries[which].startingCluster - 1) * bootSectors[which].sectersPerCluster * bootSectors[which].fatSizeSectors);
+      
+  const uint32_t countBuff = fat16Entries[which].fileSize;
+  char buff[countBuff];
+  file.seekg(dataStartBlock, std::ios_base::beg);
+  
+  std::cout << "\t\t: Now we are in byte: " 
+    << std::hex << dataStartBlock << std::endl;
+  
+  file.read(buff, countBuff);
+  std::cout << buff << std::endl;
+    
+  return true;
 }
 
