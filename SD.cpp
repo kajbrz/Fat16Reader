@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <cstdio>
+#include <iomanip>
 
 SDreader::SDreader(const SDreader &sdreader)
 {
@@ -241,9 +242,9 @@ SDreader::showFile(size_t which) //from root
       << static_cast<unsigned int>(hour)    << ":" 
       << static_cast<unsigned int>(minutes) << ":" 
       << static_cast<unsigned int>(seconds) << std::endl   
-    << "Modify Date: " << std::hex << fat16Entries[which].modifyDate << std::endl
-    << "Starting Cluster: " << std::hex << fat16Entries[which].startingCluster << std::endl
-    << "File Size: " << std::hex << fat16Entries[which].fileSize << std::endl;
+    << "Modify Date: x" << std::hex << fat16Entries[which].modifyDate << std::endl
+    << "Starting Cluster: x" << std::hex << fat16Entries[which].startingCluster << std::endl
+    << "File Size: x" << std::hex << fat16Entries[which].fileSize << std::endl;
   
   return true;
 }
@@ -262,20 +263,26 @@ SDreader::clusterToSector(uint32_t cluster)
 bool 
 SDreader::copyFileToDirectory(size_t which, std::string path)
 {
-  //uint32_t sector = clusterToSector(fat16Entries[which].startingCluster);
   uint32_t dataStartBlock = 
       (SECTOR_SIZE * partitionTables[which].startSector + 
-      (bootSectors[which].reservedSectors - 1 +
-      bootSectors[which].fatSizeSectors * 
-      bootSectors[which].numberOfFats) * bootSectors[which].sectorSize)
-      + (bootSectors[which].sectersPerCluster * bootSectors[which].rootDirEntries) + ((fat16Entries[which].startingCluster - 1) * bootSectors[which].sectersPerCluster * bootSectors[which].fatSizeSectors);
+        (bootSectors[which].reservedSectors - 1 +
+        bootSectors[which].fatSizeSectors * 
+        bootSectors[which].numberOfFats) * bootSectors[which].sectorSize)
+        + (bootSectors[which].sectersPerCluster * bootSectors[which].rootDirEntries) 
+      + ((bootSectors[which].reservedSectors - 1) * bootSectors[which].sectorSize)
+      + ((fat16Entries[which].startingCluster - 2) * 
+        bootSectors[which].sectersPerCluster * bootSectors[which].sectorSize);// * bootSectors[which].fatSizeSectors);      
       
-  const uint32_t countBuff = fat16Entries[which].fileSize;
+     
+      
+  uint32_t countBuff = fat16Entries[which].fileSize;
+  if (countBuff > 10)
+    countBuff = 10;
   char buff[countBuff];
   file.seekg(dataStartBlock, std::ios_base::beg);
   
   std::cout << "\t\t: Now we are in byte: " 
-    << std::hex << dataStartBlock << std::endl;
+    << std::hex << std::setprecision(10) << dataStartBlock << std::endl;
   
   file.read(buff, countBuff);
   std::cout << buff << std::endl;

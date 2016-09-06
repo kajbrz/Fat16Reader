@@ -27,13 +27,15 @@ main(int argv, char *arg[])
     return 3;
   }
   
-  if (!sdreader.showFile(0))
+  uint32_t which = 1;
+  
+  if (!sdreader.showFile(which))
   {
     std::cerr << "Error: Cannot find file\n" << std::endl;  
     return 4;
   }
   
-  if (!sdreader.copyFileToDirectory(0, "myFile.txt"))
+  if (!sdreader.copyFileToDirectory(which, "myFile.txt"))
   {
     std::cerr << "Error: Cannot copy file" << std::endl;
     return 5;
